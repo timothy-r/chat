@@ -24,4 +24,8 @@ Channel.prototype.subscribe = function(subscriber) {
     return id;
 };
 
+Channel.prototype.broadcast = function(message) {
+
+};
+
 module.exports = Channel;

@@ -17,5 +17,13 @@ describe('Channel', function() {
             assert(id != null);
         });
     });
+    describe('broadcast', function() {
+        it('should send json message to all subscribers', function() {
+            var channel = new Channel('test');
+            var message = {};
+            channel.broadcast(message);
+
+        });
+    });
 });
 
