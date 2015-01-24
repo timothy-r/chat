@@ -1,3 +1,5 @@
+var MD5 = require('MD5');
+
 /**
  * Encapsulates a channel which can be subscribed to
  */
@@ -9,10 +11,17 @@ function Channel(name) {
         enumerable: true,
         value: name 
     });
+
+    this.subscribers = {};
 }
 
+/**
+ * Add a subscriber return its identifier
+ */
 Channel.prototype.subscribe = function(subscriber) {
-
+    var id = MD5(Math.random());
+    this.subscribers[id] = subscriber;
+    return id;
 };
 
 module.exports = Channel;

@@ -14,6 +14,7 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var subscriber = {};
             var id = channel.subscribe(subscriber);
+            assert(id != null);
         });
     });
 });
