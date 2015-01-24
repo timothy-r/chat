@@ -5,7 +5,7 @@ var SocketServer = require('websocket').server,
     Channel = require('./lib/channel');
 
 // connected clients to the lobby before they pick a room
-var channel = new Channel('lobby');
+var lobby = new Channel('lobby');
 
 // Optional. You will see this name in eg. 'ps' or 'top' command
 process.title = 'pub-sub.server';
@@ -31,14 +31,14 @@ var colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet' ];
 colors.sort(function(a,b) { return Math.random() > 0.5; } );
 
 var web_server = http.createServer(function(request, response) {
-    // ignore requests 
+    // ignore requests
 });
 
 web_server.listen(socket_port, function() {
-    logMessage("Server is listening on port " + socket_port);
+    logMessage('Server is listening on port ' + socket_port);
 });
 
-var socker_server = new SocketServer({
+var socket_server = new SocketServer({
     // WebSocket server is tied to a HTTP server. WebSocket request is just
     // an enhanced HTTP request. For more info http://tools.ietf.org/html/rfc6455#page-6
     httpServer: web_server
@@ -46,54 +46,57 @@ var socker_server = new SocketServer({
 
 // This callback function is called every time someone
 // tries to connect to the WebSocket server
-socker_server.on('request', function(request) {
+socket_server.on('request', function(request) {
     logMessage('Connection from origin ' + request.origin + '.');
 
     // accept connection - you should check 'request.origin' to make sure that
     // client is connecting from your website
     // (http://en.wikipedia.org/wiki/Same_origin_policy)
-    var connection = request.accept(null, request.origin); 
+    var connection = request.accept(null, request.origin);
     // we need to know client index to remove them on 'close' event
-    var subscriber_id = channel.subscribe(connection);
+    var subscriber_id = lobby.subscribe(connection);
     var userName = false, userColor = false;
 
     logMessage('Connection accepted.');
 
     // send back chat history
-    channel.send(subscriber_id, 'history');
+    lobby.send(subscriber_id, 'history');
 
     // user sent some message
     connection.on('message', function(message) {
+        var payload = JSON.parse(message.utf8Data);
+        logMessage('received : ' + JSON.stringify(payload));
+
         if (message.type === 'utf8') { // accept only text
             if (userName === false) { // first message sent by user is their name
                 // remember user name
-                userName = htmlEntities(message.utf8Data);
+                userName = htmlEntities(payload.body);
                 // get random color and send it back to the user
                 userColor = colors.shift();
-                channel.send(subscriber_id, 'color', userColor);
-
+                lobby.send(subscriber_id, 'color', userColor);
                 logMessage('User is known as: ' + userName + ' with ' + userColor + ' color.');
             }
 
-            logMessage('Received Message from ' + userName + ': ' + message.utf8Data);
-                
+            logMessage('Received Message from ' + userName + ': ' + JSON.stringify(payload));
+
+            // check json.room and json.action (changeRoom, message, addRoom, listRooms, etc)
             var obj = {
                 time: (new Date()).getTime(),
-                text: htmlEntities(message.utf8Data),
+                text: htmlEntities(payload.body),
                 author: userName,
                 color: userColor
             };
 
-            channel.broadcast('message', obj);
+            lobby.broadcast('message', obj);
         }
     });
 
     // user disconnected
     connection.on('close', function(connection) {
         if (userName !== false && userColor !== false) {
-            logMessage("Peer " + connection.remoteAddress + " disconnected.");
+            logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
             // remove user from the list of connected clients
-            channel.remove(subscriber_id);
+            lobby.remove(subscriber_id);
             // push back user's color to be reused by another user
             colors.push(userColor);
         }

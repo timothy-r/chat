@@ -11,6 +11,8 @@ $(function () {
     // my name sent to the server
     var myName = false;
 
+    var room = 'lobby';
+
     // if user is running mozilla then use it's built-in WebSocket
     window.WebSocket = window.WebSocket || window.MozWebSocket;
 
@@ -81,8 +83,13 @@ $(function () {
             if (!msg) {
                 return;
             }
-            // send the message as an ordinary text
-            connection.send(msg);
+            // send the message as json
+            connection.send(
+                JSON.stringify(
+                    { body: msg, room: room, action: 'message' }
+                )
+            );
+
             $(this).val('');
             // disable the input field to make the user wait until server
             // sends back response
