@@ -31,10 +31,58 @@ describe('Channel', function() {
         it('should send json message to all subscribers', function() {
             var channel = new Channel('test');
             var type = 'message';
-            var message = {};
+            var obj = {};
             var mock_builder = Mockman.instance('subscriber').shouldReceive('sendUTF').once();
             channel.subscribe(mock_builder.getMock()());
-            channel.broadcast(type, message);
+            channel.broadcast(type, obj);
+
+            Mockman.close();
+        });
+    });
+    describe('send', function() {
+        it('should send an object to only one subscriber', function() {
+            var channel = new Channel('test');
+            var type = 'message';
+            var obj = {};
+            var sub_1 = Mockman.instance('subscriber').shouldReceive('sendUTF').once().getMock()();
+            var id_1 = channel.subscribe(sub_1);
+            var sub_2 = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
+            var id_2 = channel.subscribe(sub_1);
+            
+            var result = channel.send(id_1, type, obj);
+            assert(result);
+
+            Mockman.close();
+        });
+
+        it('should send an object to no subscribers if none exist', function() {
+            var channel = new Channel('test');
+            var type = 'message';
+            var obj = {};
+            var result = channel.send('id', type, obj);
+            assert.equal(false, result);
+        });
+
+        it('should send an object to no subscribers if none are identified', function() {
+            var channel = new Channel('test');
+            var type = 'message';
+            var obj = {};
+            var sub = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
+            channel.subscribe(sub);
+            
+            var result = channel.send('not an id', type, obj);
+            assert.equal(false, result);
+
+            Mockman.close();
+        });
+    });
+
+    // how to test history? via broadcast('history') ? or send('history', subscriber_id) ?
+    describe('history', function() {
+        it('should store its own history', function() {
+            var history = [];
+            var channel = new Channel('test', history);
+            
         });
     });
 });

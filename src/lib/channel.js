@@ -45,4 +45,18 @@ Channel.prototype.broadcast = function(type, obj) {
     }
 };
 
+/**
+ * Send obj to subscriber identified by id value
+ */
+Channel.prototype.send = function(subscriber_id, type, obj) {
+    var subscriber = this._subscribers[subscriber_id];
+    if (subscriber) {
+        subscriber.sendUTF(
+            JSON.stringify({ type: type, data: obj })
+        );
+        return true;
+    }
+    return false;
+};
+
 module.exports = Channel;
