@@ -6,6 +6,7 @@ describe('Channel', function() {
         it('should have a name', function(){
             var name = 'chan.1';
             var channel = new Channel(name);
+            assert.equal(name, channel.name);
         });
 
     });
