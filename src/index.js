@@ -12,13 +12,6 @@ var socket_port = 1337;
 var SocketServer = require('websocket').server;
 var http = require('http');
 
-/**
- * Global variables - thus limiting this app to one room
- */
-
-// add a History class to store messages - Channels manage their history
-var history = [ ];
-
 // list of currently connected clients (users)
 var channel = new Channel('lobby');
 
@@ -66,10 +59,7 @@ socker_server.on('request', function(request) {
     console.log((new Date()) + ' Connection accepted.');
 
     // send back chat history
-    if (history.length > 0) {
-        // @todo allow sending a message to a single channel subscriber using subscriber_id
-        connection.sendUTF(JSON.stringify( { type: 'history', data: history} ));
-    }
+    channel.send(subscriber_id, 'history');
 
     // user sent some message
     connection.on('message', function(message) {
@@ -79,7 +69,8 @@ socker_server.on('request', function(request) {
                 userName = htmlEntities(message.utf8Data);
                 // get random color and send it back to the user
                 userColor = colors.shift();
-                connection.sendUTF(JSON.stringify({ type:'color', data: userColor }));
+                channel.send(subscriber_id, 'color', userColor);
+
                 console.log((new Date()) + ' User is known as: ' + userName
                     + ' with ' + userColor + ' color.');
             }
@@ -87,15 +78,13 @@ socker_server.on('request', function(request) {
             console.log((new Date()) + ' Received Message from '
                 + userName + ': ' + message.utf8Data);
                 
-            // we want to keep history of all sent messages
             var obj = {
                 time: (new Date()).getTime(),
                 text: htmlEntities(message.utf8Data),
                 author: userName,
                 color: userColor
             };
-            history.push(obj);
-            history = history.slice(-100);
+
             channel.broadcast('message', obj);
         }
     });

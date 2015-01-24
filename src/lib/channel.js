@@ -5,7 +5,7 @@ var MD5 = require('MD5');
 /**
  * Encapsulates a channel which can be subscribed to
  */
-function Channel(name) {
+function Channel(name, history) {
 
     Object.defineProperty(this, 'name', {
         writable: false,
@@ -13,6 +13,9 @@ function Channel(name) {
         enumerable: true,
         value: name 
     });
+    
+    // confirm that history param is an array
+    this.history = history || [];
 
     this._subscribers = {};
 }
@@ -40,6 +43,8 @@ Channel.prototype.remove = function(id) {
  */
 Channel.prototype.broadcast = function(type, obj) {
     var json = JSON.stringify({ type: type, data: obj });
+    // store the broadcast object in history
+    this.history.push(obj);
     for (var s in this._subscribers) {
          this._subscribers[s].sendUTF(json);
     }
@@ -51,6 +56,10 @@ Channel.prototype.broadcast = function(type, obj) {
 Channel.prototype.send = function(subscriber_id, type, obj) {
     var subscriber = this._subscribers[subscriber_id];
     if (subscriber) {
+        if ('history' == type) {
+            obj = this.history;
+            // check history contains at least one item
+        }
         subscriber.sendUTF(
             JSON.stringify({ type: type, data: obj })
         );
