@@ -11,4 +11,8 @@ function Channel(name) {
     });
 }
 
+Channel.prototype.subscribe = function(subscriber) {
+
+};
+
 module.exports = Channel;
