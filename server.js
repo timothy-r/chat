@@ -12,12 +12,20 @@ var webSocketServer = require('websocket').server;
 var http = require('http');
 
 /**
- * Global variables - limiting this app to one room
+ * Global variables - thus limiting this app to one room
  */
 // latest 100 messages
 var history = [ ];
 // list of currently connected clients (users)
 var clients = [ ];
+
+var broadcast = function(obj) {
+    // broadcast message to all connected clients
+    var json = JSON.stringify({ type:'message', data: obj });
+    for (var i=0; i < clients.length; i++) {
+         clients[i].sendUTF(json);
+    }
+};
 
 /**
  * Helper function for escaping input strings
@@ -82,28 +90,22 @@ wsServer.on('request', function(request) {
                 userColor = colors.shift();
                 connection.sendUTF(JSON.stringify({ type:'color', data: userColor }));
                 console.log((new Date()) + ' User is known as: ' + userName
-                            + ' with ' + userColor + ' color.');
-
-            } else { // log and broadcast the message
-                console.log((new Date()) + ' Received Message from '
-                            + userName + ': ' + message.utf8Data);
-                
-                // we want to keep history of all sent messages
-                var obj = {
-                    time: (new Date()).getTime(),
-                    text: htmlEntities(message.utf8Data),
-                    author: userName,
-                    color: userColor
-                };
-                history.push(obj);
-                history = history.slice(-100);
-
-                // broadcast message to all connected clients
-                var json = JSON.stringify({ type:'message', data: obj });
-                for (var i=0; i < clients.length; i++) {
-                    clients[i].sendUTF(json);
-                }
+                    + ' with ' + userColor + ' color.');
             }
+
+            console.log((new Date()) + ' Received Message from '
+                + userName + ': ' + message.utf8Data);
+                
+            // we want to keep history of all sent messages
+            var obj = {
+                time: (new Date()).getTime(),
+                text: htmlEntities(message.utf8Data),
+                author: userName,
+                color: userColor
+            };
+            history.push(obj);
+            history = history.slice(-100);
+            broadcast(obj);
         }
     });
 
@@ -118,5 +120,4 @@ wsServer.on('request', function(request) {
             colors.push(userColor);
         }
     });
-
 });
