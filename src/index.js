@@ -55,7 +55,7 @@ socker_server.on('request', function(request) {
     var connection = request.accept(null, request.origin); 
     // we need to know client index to remove them on 'close' event
     var subscriber_id = channel.subscribe(connection);
-    var userName = userColor = false;
+    var userName = false, userColor = false;
 
     logMessage('Connection accepted.');
 
