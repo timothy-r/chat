@@ -12,7 +12,7 @@ var webSocketServer = require('websocket').server;
 var http = require('http');
 
 /**
- * Global variables
+ * Global variables - limiting this app to one room
  */
 // latest 100 messages
 var history = [ ];
