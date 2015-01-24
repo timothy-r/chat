@@ -1,14 +1,13 @@
-// http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
 "use strict";
 
 // Optional. You will see this name in eg. 'ps' or 'top' command
 process.title = 'pub-sub.server';
 
-// Port where we'll run the websocket server
-var webSocketsServerPort = 1337;
+// Port where we'll run the websocket server - configure via an env var
+var socket_port = 1337;
 
 // websocket and http servers
-var webSocketServer = require('websocket').server;
+var SocketServer = require('websocket').server;
 var http = require('http');
 
 /**
@@ -40,26 +39,23 @@ var colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet' ];
 
 colors.sort(function(a,b) { return Math.random() > 0.5; } );
 
-var server = http.createServer(function(request, response) {
+var web_server = http.createServer(function(request, response) {
     // ignore requests 
 });
 
-server.listen(webSocketsServerPort, function() {
-    console.log((new Date()) + " Server is listening on port " + webSocketsServerPort);
+server.listen(socket_port, function() {
+    console.log((new Date()) + " Server is listening on port " + socket_port);
 });
 
-/**
- * WebSocket server
- */
-var wsServer = new webSocketServer({
+var socker_server = new SocketServer({
     // WebSocket server is tied to a HTTP server. WebSocket request is just
     // an enhanced HTTP request. For more info http://tools.ietf.org/html/rfc6455#page-6
-    httpServer: server
+    httpServer: web_server
 });
 
 // This callback function is called every time someone
 // tries to connect to the WebSocket server
-wsServer.on('request', function(request) {
+socker_server.on('request', function(request) {
     console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
 
     // accept connection - you should check 'request.origin' to make sure that
