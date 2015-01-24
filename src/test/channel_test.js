@@ -1,5 +1,6 @@
 var Channel = require('../lib/channel'),
-    assert = require('assert');
+    assert = require('assert'),
+    Mockman = require('mockman');
 
 describe('Channel', function() {
     describe('construct', function() {
@@ -30,8 +31,9 @@ describe('Channel', function() {
         it('should send json message to all subscribers', function() {
             var channel = new Channel('test');
             var message = {};
+            var mock_builder = Mockman.instance('subscriber').shouldReceive('sendUTF').once();
+            channel.subscribe(mock_builder.getMock()());
             channel.broadcast(message);
-
         });
     });
 });
