@@ -67,9 +67,9 @@ $(function () {
             input.removeAttr('disabled'); // let the user write another message
             addMessage(json.data.author, json.data.text,
                        json.data.color, new Date(json.data.time));
-        } else {
-            console.log('Hmm..., I\'ve never seen JSON like this: ', json);
         }
+        // show it all
+        console.log('received : ', json);
     };
 
     /**
@@ -96,15 +96,14 @@ $(function () {
     });
 
     /**
-     * This method is optional. If the server wasn't able to respond to the
+     * This method is optional. If the server wasn't able to respond to the request
      * in 3 seconds then show some error message to notify the user that
      * something is wrong.
      */
     setInterval(function() {
         if (connection.readyState !== 1) {
             status.text('Error');
-            input.attr('disabled', 'disabled').val('Unable to comminucate '
-                                                 + 'with the WebSocket server.');
+            input.val('Unable to communicate with the WebSocket server.');
         }
     }, 3000);
 
