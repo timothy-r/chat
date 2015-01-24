@@ -4,8 +4,13 @@ var SocketServer = require('websocket').server,
     http = require('http'),
     Channel = require('./lib/channel');
 
-// connected clients to the lobby before they pick a room
-var lobby = new Channel('lobby');
+// connected 
+// clients to the lobby before they pick a room
+var current_room = 'lobby';
+
+var rooms = {
+    'lobby' : new Channel(current_room)
+};
 
 // Optional. You will see this name in eg. 'ps' or 'top' command
 process.title = 'pub-sub.server';
@@ -54,18 +59,17 @@ socket_server.on('request', function(request) {
     // (http://en.wikipedia.org/wiki/Same_origin_policy)
     var connection = request.accept(null, request.origin);
     // we need to know client index to remove them on 'close' event
-    var subscriber_id = lobby.subscribe(connection);
+    var subscriber_id = rooms[current_room].subscribe(connection);
     var userName = false, userColor = false;
 
     logMessage('Connection accepted.');
 
-    // send back chat history
-    lobby.send(subscriber_id, 'history');
+    // send back chat history - only when entering a different room
+    rooms[current_room].send(subscriber_id, 'history');
 
     // user sent some message
     connection.on('message', function(message) {
         var payload = JSON.parse(message.utf8Data);
-        logMessage('received : ' + JSON.stringify(payload));
 
         if (message.type === 'utf8') { // accept only text
             if (userName === false) { // first message sent by user is their name
@@ -73,7 +77,7 @@ socket_server.on('request', function(request) {
                 userName = htmlEntities(payload.body);
                 // get random color and send it back to the user
                 userColor = colors.shift();
-                lobby.send(subscriber_id, 'color', userColor);
+                rooms[current_room].send(subscriber_id, 'color', userColor);
                 logMessage('User is known as: ' + userName + ' with ' + userColor + ' color.');
             }
 
@@ -87,7 +91,8 @@ socket_server.on('request', function(request) {
                 color: userColor
             };
 
-            lobby.broadcast('message', obj);
+            // get room name from payload
+            rooms[current_room].broadcast('message', obj);
         }
     });
 
@@ -96,7 +101,7 @@ socket_server.on('request', function(request) {
         if (userName !== false && userColor !== false) {
             logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
             // remove user from the list of connected clients
-            lobby.remove(subscriber_id);
+            rooms[current_room].remove(subscriber_id);
             // push back user's color to be reused by another user
             colors.push(userColor);
         }
