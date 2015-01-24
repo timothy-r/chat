@@ -17,6 +17,15 @@ describe('Channel', function() {
             assert(id != null);
         });
     });
+    describe('remove', function() {
+        it('should remove a subscriber', function() {
+            var channel = new Channel('test');
+            var subscriber = {'name' : 'fronk'};
+            var id = channel.subscribe(subscriber);
+            var result = channel.remove(id);
+            assert.equal(subscriber, result);
+        });
+    });
     describe('broadcast', function() {
         it('should send json message to all subscribers', function() {
             var channel = new Channel('test');

@@ -16,7 +16,7 @@ function Channel(name) {
 }
 
 /**
- * Add a subscriber return its identifier
+ * Add a subscriber, return its identifier
  */
 Channel.prototype.subscribe = function(subscriber) {
     var id = MD5(Math.random());
@@ -24,6 +24,18 @@ Channel.prototype.subscribe = function(subscriber) {
     return id;
 };
 
+/**
+ * Remove the subscriber with this id, return the subscriber object
+ */
+Channel.prototype.remove = function(id) {
+    var sub = this.subscribers[id];
+    delete this.subscribers[id];
+    return sub;
+};
+
+/**
+ * Send a json object to all subscribers
+ */
 Channel.prototype.broadcast = function(message) {
 
 };
