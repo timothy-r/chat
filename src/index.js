@@ -1,19 +1,17 @@
 "use strict";
 
-var Channel = require('./lib/channel');
+var SocketServer = require('websocket').server,
+    http = require('http'),
+    Channel = require('./lib/channel');
+
+// connected clients to the lobby before they pick a room
+var channel = new Channel('lobby');
 
 // Optional. You will see this name in eg. 'ps' or 'top' command
 process.title = 'pub-sub.server';
 
 // Port where we'll run the websocket server - configure via an env var
 var socket_port = 1337;
-
-// websocket and http servers
-var SocketServer = require('websocket').server;
-var http = require('http');
-
-// list of currently connected clients (users)
-var channel = new Channel('lobby');
 
 /**
  * Helper function for escaping input strings
@@ -22,6 +20,10 @@ function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
                       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+function logMessage(msg) {
+    console.log((new Date()) + ' ' + msg);
+};
 
 // Array with some colors
 var colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet' ];
@@ -33,7 +35,7 @@ var web_server = http.createServer(function(request, response) {
 });
 
 web_server.listen(socket_port, function() {
-    console.log((new Date()) + " Server is listening on port " + socket_port);
+    logMessage("Server is listening on port " + socket_port);
 });
 
 var socker_server = new SocketServer({
@@ -45,8 +47,7 @@ var socker_server = new SocketServer({
 // This callback function is called every time someone
 // tries to connect to the WebSocket server
 socker_server.on('request', function(request) {
-    // @todo add a log helper function to prepend date to all log messages
-    console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
+    logMessage('Connection from origin ' + request.origin + '.');
 
     // accept connection - you should check 'request.origin' to make sure that
     // client is connecting from your website
@@ -56,7 +57,7 @@ socker_server.on('request', function(request) {
     var subscriber_id = channel.subscribe(connection);
     var userName = userColor = false;
 
-    console.log((new Date()) + ' Connection accepted.');
+    logMessage('Connection accepted.');
 
     // send back chat history
     channel.send(subscriber_id, 'history');
@@ -71,12 +72,10 @@ socker_server.on('request', function(request) {
                 userColor = colors.shift();
                 channel.send(subscriber_id, 'color', userColor);
 
-                console.log((new Date()) + ' User is known as: ' + userName
-                    + ' with ' + userColor + ' color.');
+                logMessage('User is known as: ' + userName + ' with ' + userColor + ' color.');
             }
 
-            console.log((new Date()) + ' Received Message from '
-                + userName + ': ' + message.utf8Data);
+            logMessage('Received Message from ' + userName + ': ' + message.utf8Data);
                 
             var obj = {
                 time: (new Date()).getTime(),
@@ -92,8 +91,7 @@ socker_server.on('request', function(request) {
     // user disconnected
     connection.on('close', function(connection) {
         if (userName !== false && userColor !== false) {
-            console.log((new Date()) + " Peer "
-                + connection.remoteAddress + " disconnected.");
+            logMessage("Peer " + connection.remoteAddress + " disconnected.");
             // remove user from the list of connected clients
             channel.remove(subscriber_id);
             // push back user's color to be reused by another user
