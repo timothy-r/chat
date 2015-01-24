@@ -1,3 +1,5 @@
+"use strict";
+
 var MD5 = require('MD5');
 
 /**
