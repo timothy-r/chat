@@ -45,6 +45,7 @@ var socker_server = new SocketServer({
 // This callback function is called every time someone
 // tries to connect to the WebSocket server
 socker_server.on('request', function(request) {
+    // @todo add a log helper function to prepend date to all log messages
     console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
 
     // accept connection - you should check 'request.origin' to make sure that
@@ -53,8 +54,7 @@ socker_server.on('request', function(request) {
     var connection = request.accept(null, request.origin); 
     // we need to know client index to remove them on 'close' event
     var subscriber_id = channel.subscribe(connection);
-    var userName = false;
-    var userColor = false;
+    var userName = userColor = false;
 
     console.log((new Date()) + ' Connection accepted.');
 
