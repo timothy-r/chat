@@ -8,7 +8,7 @@ RUN apt-get update -qq && \
     nodejs \
     npm
 
-EXPOSE 80
+EXPOSE 1337
 
 CMD ["nodejs", "/home/app/index.js"]
 

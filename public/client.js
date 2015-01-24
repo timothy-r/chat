@@ -23,7 +23,7 @@ $(function () {
         return;
     }
 
-    // open connection
+    // open connection - parameterize the endpoint
     var connection = new WebSocket('ws://127.0.0.1:1337');
 
     connection.onopen = function () {
