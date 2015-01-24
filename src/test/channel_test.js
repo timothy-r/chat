@@ -30,10 +30,11 @@ describe('Channel', function() {
     describe('broadcast', function() {
         it('should send json message to all subscribers', function() {
             var channel = new Channel('test');
+            var type = 'message';
             var message = {};
             var mock_builder = Mockman.instance('subscriber').shouldReceive('sendUTF').once();
             channel.subscribe(mock_builder.getMock()());
-            channel.broadcast(message);
+            channel.broadcast(type, message);
         });
     });
 });

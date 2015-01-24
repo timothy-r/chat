@@ -15,20 +15,12 @@ var http = require('http');
 /**
  * Global variables - thus limiting this app to one room
  */
-// latest 100 messages
-var history = [ ];
-// list of currently connected clients (users)
-//var clients = [ ];
-var channel = new Channel('lobby');
 
-/*var broadcast = function(obj) {
-    // broadcast message to all connected clients
-    var json = JSON.stringify({ type:'message', data: obj });
-    for (var i=0; i < clients.length; i++) {
-         clients[i].sendUTF(json);
-    }
-};
-*/
+// add a History class to store messages - Channels manage their history
+var history = [ ];
+
+// list of currently connected clients (users)
+var channel = new Channel('lobby');
 
 /**
  * Helper function for escaping input strings
@@ -68,7 +60,6 @@ socker_server.on('request', function(request) {
     var connection = request.accept(null, request.origin); 
     // we need to know client index to remove them on 'close' event
     var subscriber_id = channel.subscribe(connection);
-    //clients.push(connection) - 1;
     var userName = false;
     var userColor = false;
 
@@ -76,7 +67,7 @@ socker_server.on('request', function(request) {
 
     // send back chat history
     if (history.length > 0) {
-        // allow sending a message to a single channel subscriber using subscriber_id
+        // @todo allow sending a message to a single channel subscriber using subscriber_id
         connection.sendUTF(JSON.stringify( { type: 'history', data: history} ));
     }
 
@@ -105,8 +96,7 @@ socker_server.on('request', function(request) {
             };
             history.push(obj);
             history = history.slice(-100);
-            channel.broadcast(obj);
-            //broadcast(obj);
+            channel.broadcast('message', obj);
         }
     });
 
@@ -116,7 +106,6 @@ socker_server.on('request', function(request) {
             console.log((new Date()) + " Peer "
                 + connection.remoteAddress + " disconnected.");
             // remove user from the list of connected clients
-            //clients.splice(index, 1);
             channel.remove(subscriber_id);
             // push back user's color to be reused by another user
             colors.push(userColor);

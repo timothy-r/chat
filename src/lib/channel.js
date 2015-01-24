@@ -38,8 +38,8 @@ Channel.prototype.remove = function(id) {
 /**
  * Send a json object to all subscribers
  */
-Channel.prototype.broadcast = function(message) {
-    var json = JSON.stringify({ type:'message', data: message });
+Channel.prototype.broadcast = function(type, obj) {
+    var json = JSON.stringify({ type: type, data: obj });
     for (var s in this._subscribers) {
          this._subscribers[s].sendUTF(json);
     }
