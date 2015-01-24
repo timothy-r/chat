@@ -12,7 +12,7 @@ function Channel(name) {
         value: name 
     });
 
-    this.subscribers = {};
+    this._subscribers = {};
 }
 
 /**
@@ -20,7 +20,7 @@ function Channel(name) {
  */
 Channel.prototype.subscribe = function(subscriber) {
     var id = MD5(Math.random());
-    this.subscribers[id] = subscriber;
+    this._subscribers[id] = subscriber;
     return id;
 };
 
@@ -28,8 +28,8 @@ Channel.prototype.subscribe = function(subscriber) {
  * Remove the subscriber with this id, return the subscriber object
  */
 Channel.prototype.remove = function(id) {
-    var sub = this.subscribers[id];
-    delete this.subscribers[id];
+    var sub = this._subscribers[id];
+    delete this._subscribers[id];
     return sub;
 };
 
@@ -38,10 +38,9 @@ Channel.prototype.remove = function(id) {
  */
 Channel.prototype.broadcast = function(message) {
     var json = JSON.stringify({ type:'message', data: message });
-    for (var s in this.subscribers) {
-         this.subscribers[s].sendUTF(json);
+    for (var s in this._subscribers) {
+         this._subscribers[s].sendUTF(json);
     }
-
 };
 
 module.exports = Channel;
