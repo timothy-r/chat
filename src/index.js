@@ -91,7 +91,7 @@ socket_server.on('request', function(request) {
     // client disconnected
     connection.on('close', function(connection) {
         if (user) {
-            logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
+            logMessage('Client ' + user.name + ' disconnected.');
             // remove user from the list of connected clients
             Channels.get(current).remove(user);
         }
