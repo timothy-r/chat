@@ -27,6 +27,7 @@ function logMessage(msg) {
 function createMessage(body, author, colour) {
   return {
     time: (new Date()).getTime(),
+    // do this in the client (if they are displaying this in a html document)
     text: htmlEntities(body),
     author: author,
     color: colour
@@ -52,11 +53,11 @@ socket_server.on('request', function(request) {
 
     var connection = request.accept(null, request.origin);
     // we need to know client id to remove them on 'close' event
-    var subscriber_id = Channels.get(current).subscribe(connection);
-    var userName = false, userColor = false;
+    // should really tell the Channel the subscriber id
+    var user = { name: false, colour: false, subscriber_id: Channels.get(current).subscribe(connection) };
 
     // send back chat history - only do this when entering a different room
-    Channels.get(current).send(subscriber_id, 'history');
+    Channels.get(current).send(user.subscriber_id, 'history');
 
     // user sent some message
     connection.on('message', function(message) {
@@ -67,23 +68,28 @@ socket_server.on('request', function(request) {
             // may be post-message, set-name (ie log in), subcribe, list-channels, add-channel
             switch (payload.action) {
                 case 'set-name':
-                    userName = htmlEntities(payload.body);
+                    user.name = htmlEntities(payload.body);
                     // get random color and send it back to the user
-                    userColor = Colour.get();
-                    Channels.get(current).send(subscriber_id, 'color', userColor);
-                    logMessage('User is known as: ' + userName + ' with ' + userColor + ' color.');
+                    user.colour = Colour.get();
+                    Channels.get(current).send(user.subscriber_id, 'color', user.colour);
+                    logMessage('User is known as: ' + user.name + ' with ' + user.colour + ' color.');
 
-                    var obj = createMessage('User ' + userName + ' connected', userName, userColor);
+                    var obj = createMessage('User ' + user.name + ' connected', user.name, user.colour);
                     Channels.get(current).broadcast('message', obj);
                     break;
 
                 case 'post-message':
-                    logMessage('Received Message from ' + userName + ': ' + JSON.stringify(payload));
+                    logMessage('Received Message from ' + user.name + ': ' + JSON.stringify(payload));
 
-                    var obj = createMessage(payload.body, userName, userColor);
+                    var obj = createMessage(payload.body, user.name, user.colour);
 
                     // get room name from payload? we have it here to in the connection
                     Channels.get(current).broadcast('message', obj);
+                    break;
+                case 'list-channels':
+                    var obj = createMessage(JSON.stringify(Channels.list()), user.name, user.colour);
+                    // only send to subscriber that made the request
+                    Channels.get(current).send(user.subscriber_id, 'channel-list', obj);
                     break;
             }
         }
@@ -91,10 +97,10 @@ socket_server.on('request', function(request) {
 
     // client disconnected
     connection.on('close', function(connection) {
-        if (userName !== false && userColor !== false) {
+        if (user.name !== false && user.colour !== false) {
             logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
             // remove user from the list of connected clients
-            Channels.get(current).remove(subscriber_id);
+            Channels.get(current).remove(user.subscriber_id);
         }
     });
 });
