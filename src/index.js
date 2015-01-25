@@ -2,7 +2,8 @@
 
 var SocketServer = require('websocket').server,
     http = require('http'),
-    Channel = require('./lib/channel');
+    Channel = require('./lib/channel'),
+    Colour = require('./lib/colour');
 
 // connect clients to the lobby before they pick a room
 var current = 'lobby';
@@ -37,12 +38,6 @@ function createMessage(body, author, colour) {
     color: colour
   };
 }
-
-
-// Array with some colors
-var colors = [ 'red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet' ];
-
-colors.sort(function(a,b) { return Math.random() > 0.5; } );
 
 var web_server = http.createServer(function(request, response) {
     // ignore requests
@@ -83,7 +78,7 @@ socket_server.on('request', function(request) {
                 case 'set-name':
                     userName = htmlEntities(payload.body);
                     // get random color and send it back to the user
-                    userColor = colors.shift();
+                    userColor = Colour.get();
                     channels[current].send(subscriber_id, 'color', userColor);
                     logMessage('User is known as: ' + userName + ' with ' + userColor + ' color.');
 
@@ -109,8 +104,6 @@ socket_server.on('request', function(request) {
             logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
             // remove user from the list of connected clients
             channels[current].remove(subscriber_id);
-            // push back user's color to be reused by another user
-            colors.push(userColor);
         }
     });
 });
