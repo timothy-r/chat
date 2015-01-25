@@ -1,3 +1,5 @@
+'use strict';
+
 var Channel = require('./channel'),
     _ = require('underscore');
 /*

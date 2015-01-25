@@ -6,6 +6,7 @@ var SocketServer = require('websocket').server,
     Colour = require('./lib/colour');
 
 // connect clients to the lobby before they pick a room
+// configure default set of rooms, lobby is where interactive clients can enter
 var current = 'lobby';
 Channels.add(current);
 
@@ -89,7 +90,7 @@ socket_server.on('request', function(request) {
 
                     var obj = createMessage(payload.body, user.name, user.colour);
 
-                    // get room name from payload? we have it here to in the connection
+                    // get room name from payload? we have it here in the connection as well
                     Channels.get(current).broadcast('message', obj);
                     break;
                 case 'list-channels':
