@@ -3,7 +3,7 @@
 var SocketServer = require('websocket').server,
     http = require('http'),
     Channels = require('./lib/channels'),
-    Colour = require('./lib/colour');
+    UserStore = require('./lib/user_store');
 
 // connect clients to the lobby before they pick a room
 // configure default set of rooms, lobby is where interactive clients can enter
@@ -54,12 +54,11 @@ socket_server.on('request', function(request) {
     logMessage('Connection from origin ' + request.origin + '.');
 
     var connection = request.accept(null, request.origin);
-    // we need to know client id to remove them on 'close' event
-    // should really tell the Channel the subscriber id
-    var user = { name: false, colour: false, subscriber_id: Channels.get(current).subscribe(connection) };
+    var user = UserStore.create();
+    Channels.get(current).subscribe(user, connection);
 
-    // send back chat history - only do this when entering a different room
-    Channels.get(current).send(user.subscriber_id, 'history');
+    // send chat history - only do this when entering a different room, not lobby?
+    Channels.get(current).send(user, 'history');
 
     // user sent some message
     connection.on('message', function(message) {
@@ -73,8 +72,7 @@ socket_server.on('request', function(request) {
                     // log in
                     user.name = payload.body;
                     // get a color and send it to the client
-                    user.colour = Colour.get();
-                    Channels.get(current).send(user.subscriber_id, 'color', user.colour);
+                    Channels.get(current).send(user, 'color', user.colour);
                     logMessage('User is known as: ' + user.name + ' with ' + user.colour + ' color.');
 
                     var obj = createMessage('User ' + user.name + ' connected', user.name, user.colour);
@@ -82,7 +80,7 @@ socket_server.on('request', function(request) {
 
                     var obj = createMessage(Channels.list(), user.name, user.colour);
                     // send the room list to the client
-                    Channels.get(current).send(user.subscriber_id, 'channel-list', obj);
+                    Channels.get(current).send(user, 'channel-list', obj);
                     break;
 
                 case 'post-message':
@@ -96,7 +94,7 @@ socket_server.on('request', function(request) {
                 case 'list-channels':
                     var obj = createMessage(Channels.list(), user.name, user.colour);
                     // only send to subscriber that made the request
-                    Channels.get(current).send(user.subscriber_id, 'channel-list', obj);
+                    Channels.get(current).send(user, 'channel-list', obj);
                     break;
             }
         }
@@ -107,7 +105,7 @@ socket_server.on('request', function(request) {
         if (user.name !== false && user.colour !== false) {
             logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
             // remove user from the list of connected clients
-            Channels.get(current).remove(user.subscriber_id);
+            Channels.get(current).remove(user);
         }
     });
 });
