@@ -15,10 +15,12 @@ process.title = 'pub-sub.server';
 // Port where we'll run the websocket server - configure via an env var
 var socket_port = 1337;
 
+/*
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+*/
 
 function logMessage(msg) {
     console.log((new Date()) + ' ' + msg);
@@ -27,7 +29,6 @@ function logMessage(msg) {
 function createMessage(body, author, colour) {
   return {
     time: (new Date()).getTime(),
-    // do this in the client (if they are displaying this in a html document)
     body: body,
     author: author,
     color: colour
@@ -69,7 +70,7 @@ socket_server.on('request', function(request) {
             switch (payload.action) {
                 case 'set-name':
                     // log in
-                    user.name = htmlEntities(payload.body);
+                    user.name = payload.body;
                     // get a color and send it to the client
                     user.colour = Colour.get();
                     Channels.get(current).send(user.subscriber_id, 'color', user.colour);
