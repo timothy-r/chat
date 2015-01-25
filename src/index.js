@@ -3,7 +3,8 @@
 var SocketServer = require('websocket').server,
     http = require('http'),
     Channels = require('./lib/channels'),
-    UserStore = require('./lib/user_store');
+    UserStore = require('./lib/user_store'),
+    Message = require('./lib/message');
 
 // connect clients to the lobby before they pick a room
 // configure default set of rooms, lobby is where interactive clients can enter
@@ -16,24 +17,8 @@ process.title = 'pub-sub.server';
 // Port where we'll run the websocket server - configure via an env var
 var socket_port = 1337;
 
-/*
-function htmlEntities(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-*/
-
 function logMessage(msg) {
     console.log((new Date()) + ' ' + msg);
-}
-
-function createMessage(body, author, colour) {
-  return {
-    time: (new Date()).getTime(),
-    body: body,
-    author: author,
-    color: colour
-  };
 }
 
 var web_server = http.createServer(function(request, response) {});
@@ -75,10 +60,10 @@ socket_server.on('request', function(request) {
                     Channels.get(current).send(user, 'color', user.colour);
                     logMessage('User is known as: ' + user.name + ' with ' + user.colour + ' color.');
 
-                    var obj = createMessage('User ' + user.name + ' connected', user.name, user.colour);
+                    var obj = Message.create('User ' + user.name + ' connected', user);
                     Channels.get(current).broadcast('message', obj);
 
-                    var obj = createMessage(Channels.list(), user.name, user.colour);
+                    var obj = Message.create(Channels.list(), user);
                     // send the room list to the client
                     Channels.get(current).send(user, 'channel-list', obj);
                     break;
@@ -86,13 +71,13 @@ socket_server.on('request', function(request) {
                 case 'post-message':
                     logMessage('Received Message from ' + user.name + ': ' + JSON.stringify(payload));
 
-                    var obj = createMessage(payload.body, user.name, user.colour);
+                    var obj = Message.create(payload.body, user);
 
                     // get room name from payload? we have it here in the connection as well
                     Channels.get(current).broadcast('message', obj);
                     break;
                 case 'list-channels':
-                    var obj = createMessage(Channels.list(), user.name, user.colour);
+                    var obj = Message.create(Channels.list(), user);
                     // only send to subscriber that made the request
                     Channels.get(current).send(user, 'channel-list', obj);
                     break;
