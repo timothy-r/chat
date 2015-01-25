@@ -65,11 +65,10 @@ $(function () {
             addMessage(json.data.author, json.data.body,
                        json.data.color, new Date(json.data.time));
         } else if (json.type == 'channel-list') {
-            // update the list of available rooms
-            // clear rooms element
-            rooms.html('room list');
+            // clear rooms list and re-populate
             rooms.html('');
             for (var room in json.data.body) {
+                // attach listener to each room item to enable room switching
                 rooms.append('<li>' + json.data.body[room] + '</li>');
             }
         }
