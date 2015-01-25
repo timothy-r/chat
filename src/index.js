@@ -84,6 +84,13 @@ socket_server.on('request', function(request) {
                     // only send to subscriber that made the request
                     Channels.get(current).send(user, 'channel-list', obj);
                     break;
+                case 'subscribe':
+                    logMessage('Subscribe ' + user.name + ' to room ' + payload.body);
+                    var conn = Channels.get(current).remove(user);
+                    current = payload.body;
+                    Channels.get(current).subscribe(user, conn);
+                    Channels.get(current).send(user, 'history');
+                    break;
             }
         }
     });

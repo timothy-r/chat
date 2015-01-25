@@ -67,9 +67,25 @@ $(function () {
         } else if (json.type == 'channel-list') {
             // clear rooms list and re-populate
             rooms.html('');
-            for (var room in json.data.body) {
+
+            for (var r in json.data.body) {
                 // attach listener to each room item to enable room switching
-                rooms.append('<li>' + json.data.body[room] + '</li>');
+                // should have a better way to id the elements than indexes from an array
+                //var id = 'room-' + json.data.body[r];
+                console.log(r);
+                rooms.append('<li><a id="' + r + '" href="#">' + json.data.body[r] + '</a></li>');
+                
+                $( "#" + r ).click(function(e) {
+                
+                    var room = json.data.body[e.target.id];
+                    connection.send(
+                        JSON.stringify(
+                            { body: room, action: 'subscribe', room: room }
+                        )
+                    );
+                
+                });
+                
             }
         }
 
