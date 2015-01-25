@@ -24,10 +24,9 @@ function Channel(name, history) {
 /**
  * Add a subscriber, return its identifier
  */
-Channel.prototype.subscribe = function(subscriber) {
-    var id = MD5(Math.random());
-    this._subscribers[id] = subscriber;
-    return id;
+Channel.prototype.subscribe = function(user, subscriber) {
+    this._subscribers[user.id] = subscriber;
+    return user.id;
 };
 
 /**
