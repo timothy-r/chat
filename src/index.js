@@ -2,17 +2,12 @@
 
 var SocketServer = require('websocket').server,
     http = require('http'),
-    Channel = require('./lib/channel');
+    Channels = require('./lib/channels');
 
 // connect clients to the lobby before they pick a room
 var current = 'lobby';
 
-/**
- * Implement a channel container rather than just an object/hash
- */
-var channels = {
-    'lobby' : new Channel(current)
-};
+Channels.add(current);
 
 // Optional. You will see this name in eg. 'ps' or 'top' command
 process.title = 'pub-sub.server';
@@ -66,11 +61,11 @@ socket_server.on('request', function(request) {
 
     var connection = request.accept(null, request.origin);
     // we need to know client id to remove them on 'close' event
-    var subscriber_id = channels[current].subscribe(connection);
+    var subscriber_id = Channels.get(current).subscribe(connection);
     var userName = false, userColor = false;
 
     // send back chat history - only do this when entering a different room
-    channels[current].send(subscriber_id, 'history');
+    Channels.get(current).send(subscriber_id, 'history');
 
     // user sent some message
     connection.on('message', function(message) {
@@ -84,11 +79,11 @@ socket_server.on('request', function(request) {
                     userName = htmlEntities(payload.body);
                     // get random color and send it back to the user
                     userColor = colors.shift();
-                    channels[current].send(subscriber_id, 'color', userColor);
+                    Channels.get(current).send(subscriber_id, 'color', userColor);
                     logMessage('User is known as: ' + userName + ' with ' + userColor + ' color.');
 
                     var obj = createMessage('User ' + userName + ' connected', userName, userColor);
-                    channels[current].broadcast('message', obj);
+                    Channels.get(current).broadcast('message', obj);
                     break;
 
                 case 'post-message':
@@ -97,7 +92,7 @@ socket_server.on('request', function(request) {
                     var obj = createMessage(payload.body, userName, userColor);
 
                     // get room name from payload? we have it here to in the connection
-                    channels[current].broadcast('message', obj);
+                    Channels.get(current).broadcast('message', obj);
                     break;
             }
         }
@@ -108,7 +103,7 @@ socket_server.on('request', function(request) {
         if (userName !== false && userColor !== false) {
             logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
             // remove user from the list of connected clients
-            channels[current].remove(subscriber_id);
+            Channels.get(current).remove(subscriber_id);
             // push back user's color to be reused by another user
             colors.push(userColor);
         }
