@@ -36,8 +36,8 @@ describe('Channel', function() {
             var user = {id: 'abcde', name: 'test', colour: 'red'};
             var obj = {};
             var subscriber = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
-            var id = channel.subscribe(user, subscriber);
-            var result = channel.remove(id);
+            channel.subscribe(user, subscriber);
+            var result = channel.remove(user);
             assert.equal(subscriber, result);
             // confirm that removed subscriber does not get called
             channel.broadcast('test', obj);

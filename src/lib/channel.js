@@ -32,9 +32,9 @@ Channel.prototype.subscribe = function(user, subscriber) {
 /**
  * Remove the subscriber with this id, return the subscriber object
  */
-Channel.prototype.remove = function(id) {
-    var sub = this._subscribers[id];
-    delete this._subscribers[id];
+Channel.prototype.remove = function(user) {
+    var sub = this._subscribers[user.id];
+    delete this._subscribers[user.id];
     return sub;
 };
 
