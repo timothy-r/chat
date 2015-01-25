@@ -1,6 +1,7 @@
 "use strict";
 
-var MD5 = require('MD5');
+var MD5 = require('MD5'),
+    _ = require('underscore');
 
 /**
  * Encapsulates a channel which can be subscribed to
@@ -15,7 +16,7 @@ function Channel(name, history) {
     });
     
     // confirm that history param is an array
-    this.history = history || [];
+    this.history = _.isArray(history) ? history : [];
 
     this._subscribers = {};
 }
