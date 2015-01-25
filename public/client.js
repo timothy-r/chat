@@ -49,6 +49,8 @@ $(function () {
             console.log('Invalid JSON: ', message.data);
             return;
         }
+        
+        $('#room-name').html(room);
 
         if (json.type === 'color') {
             myColor = json.data;
@@ -77,12 +79,16 @@ $(function () {
                 
                 $( "#" + r ).click(function(e) {
                 
-                    var room = json.data.body[e.target.id];
+                    var new_room = json.data.body[e.target.id];
                     connection.send(
                         JSON.stringify(
-                            { body: room, action: 'subscribe', room: room }
+                            { body: new_room, action: 'subscribe', room: new_room }
                         )
                     );
+                    // clear the message window in anticipation of the new room content
+                    content.html('');
+                    room = new_room;
+                    $('#room-name').html(room);
                 
                 });
                 

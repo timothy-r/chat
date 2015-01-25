@@ -12,7 +12,9 @@ for(var c in Config.channels.all) {
     Channels.add(Config.channels.all[c]);
 }
 
-var current = Config.channels.current;
+// current is shared across all clients...
+// either store current room in user or in the client itself
+//var current = Config.channels.current;
 
 // This name is shown in 'ps' or 'top' command
 process.title = Config.process.title;
@@ -39,7 +41,8 @@ var socket_server = new SocketServer({
 // Called on connecting to web socket server
 socket_server.on('request', function(request) {
 
-    logMessage('Connection from origin ' + request.origin + '.');
+    var current = Config.channels.current;
+    logMessage('Connection from origin ' + request.origin + ' current = ' + current );
 
     var connection = request.accept(null, request.origin);
     var user = UserStore.create();
