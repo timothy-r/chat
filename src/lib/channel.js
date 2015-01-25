@@ -16,7 +16,7 @@ function Channel(name, history) {
     });
     
     // confirm that history param is an array
-    this.history = _.isArray(history) ? history : [];
+    this._history = _.isArray(history) ? history : [];
 
     this._subscribers = {};
 }
@@ -45,7 +45,7 @@ Channel.prototype.remove = function(id) {
 Channel.prototype.broadcast = function(type, obj) {
     var json = JSON.stringify({ type: type, data: obj });
     // store the broadcast object in history
-    this.history.push(obj);
+    this._history.push(obj);
     for (var s in this._subscribers) {
          this._subscribers[s].sendUTF(json);
     }
@@ -58,7 +58,7 @@ Channel.prototype.send = function(subscriber_id, type, obj) {
     var subscriber = this._subscribers[subscriber_id];
     if (subscriber) {
         if ('history' == type) {
-            obj = this.history;
+            obj = this._history;
             // check history contains at least one item
         }
         subscriber.sendUTF(
