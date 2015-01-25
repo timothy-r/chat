@@ -83,10 +83,17 @@ $(function () {
             if (!msg) {
                 return;
             }
+            
+            var action = 'post-message';
+            // send name as the first message
+            if (myName === false) {
+                myName = msg;
+                action = 'set-name';
+            }
             // send the message as json
             connection.send(
                 JSON.stringify(
-                    { body: msg, room: room, action: 'message' }
+                    { body: msg, room: room, action: action }
                 )
             );
 
@@ -95,10 +102,6 @@ $(function () {
             // sends back response
             input.attr('disabled', 'disabled');
 
-            // we know that the first message sent from a user their name
-            if (myName === false) {
-                myName = msg;
-            }
         }
     });
 
