@@ -5,6 +5,7 @@ $(function () {
     var content = $('#content');
     var input = $('#input');
     var status = $('#status');
+    var rooms = $('#rooms');
 
     // my color assigned by the server
     var myColor = false;
@@ -42,34 +43,37 @@ $(function () {
 
     // most important part - incoming messages
     connection.onmessage = function (message) {
-        // try to parse JSON message. Because we know that the server always returns
-        // JSON this should work without any problem but we should make sure that
-        // the massage is not chunked or otherwise damaged.
         try {
             var json = JSON.parse(message.data);
         } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message.data);
+            console.log('Invalid JSON: ', message.data);
             return;
         }
 
-        // NOTE: if you're not sure about the JSON structure
-        // check the server source code above
-        if (json.type === 'color') { // first response from the server with user's color
+        if (json.type === 'color') {
             myColor = json.data;
             status.text(myName + ': ').css('color', myColor);
             input.removeAttr('disabled').focus();
-            // from now user can start sending messages
         } else if (json.type === 'history') { // entire message history
             // insert every single message to the chat window
             for (var i=0; i < json.data.length; i++) {
-                addMessage(json.data[i].author, json.data[i].text,
+                addMessage(json.data[i].author, json.data[i].body,
                            json.data[i].color, new Date(json.data[i].time));
             }
-        } else if (json.type === 'message') { // it's a single message
-            input.removeAttr('disabled'); // let the user write another message
-            addMessage(json.data.author, json.data.text,
+        } else if (json.type === 'message') {
+            input.removeAttr('disabled');
+            addMessage(json.data.author, json.data.body,
                        json.data.color, new Date(json.data.time));
+        } else if (json.type == 'channel-list') {
+            // update the list of available rooms
+            // clear rooms element
+            rooms.html('room list');
+            rooms.html('');
+            for (var room in json.data.body) {
+                rooms.append('<li>' + json.data.body[room] + '</li>');
+            }
         }
+
         // show it all
         console.log('received : ', json);
     };

@@ -28,7 +28,7 @@ function createMessage(body, author, colour) {
   return {
     time: (new Date()).getTime(),
     // do this in the client (if they are displaying this in a html document)
-    text: htmlEntities(body),
+    body: body,
     author: author,
     color: colour
   };
@@ -68,14 +68,19 @@ socket_server.on('request', function(request) {
             // may be post-message, set-name (ie log in), subcribe, list-channels, add-channel
             switch (payload.action) {
                 case 'set-name':
+                    // log in
                     user.name = htmlEntities(payload.body);
-                    // get random color and send it back to the user
+                    // get a color and send it to the client
                     user.colour = Colour.get();
                     Channels.get(current).send(user.subscriber_id, 'color', user.colour);
                     logMessage('User is known as: ' + user.name + ' with ' + user.colour + ' color.');
 
                     var obj = createMessage('User ' + user.name + ' connected', user.name, user.colour);
                     Channels.get(current).broadcast('message', obj);
+
+                    var obj = createMessage(Channels.list(), user.name, user.colour);
+                    // send the room list to the client
+                    Channels.get(current).send(user.subscriber_id, 'channel-list', obj);
                     break;
 
                 case 'post-message':
@@ -87,7 +92,7 @@ socket_server.on('request', function(request) {
                     Channels.get(current).broadcast('message', obj);
                     break;
                 case 'list-channels':
-                    var obj = createMessage(JSON.stringify(Channels.list()), user.name, user.colour);
+                    var obj = createMessage(Channels.list(), user.name, user.colour);
                     // only send to subscriber that made the request
                     Channels.get(current).send(user.subscriber_id, 'channel-list', obj);
                     break;
