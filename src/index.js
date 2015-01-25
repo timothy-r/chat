@@ -6,7 +6,6 @@ var SocketServer = require('websocket').server,
 
 // connect clients to the lobby before they pick a room
 var current = 'lobby';
-
 Channels.add(current);
 
 // Optional. You will see this name in eg. 'ps' or 'top' command
