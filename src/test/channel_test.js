@@ -69,7 +69,7 @@ describe('Channel', function() {
             var sub_2 = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
             var id_2 = channel.subscribe(user_2, sub_1);
             
-            var result = channel.send(id_1, type, obj);
+            var result = channel.send(user_1, type, obj);
             assert(result);
         });
 
@@ -77,7 +77,8 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var result = channel.send('id', type, obj);
+            var user = { id: 'x'}
+            var result = channel.send(user, type, obj);
             assert.equal(false, result);
         });
 
@@ -85,11 +86,12 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var user = {id: 'abcde', name: 'test', colour: 'red'};
+            var user_1 = {id: 'abcde', name: 'test', colour: 'red'};
             var sub = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
-            channel.subscribe(user, sub);
+            channel.subscribe(user_1, sub);
             
-            var result = channel.send('not an id', type, obj);
+            var user_2 = { id: 'not an id'}
+            var result = channel.send(user_2, type, obj);
             assert.equal(false, result);
         });
     });

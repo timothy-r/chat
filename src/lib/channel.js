@@ -53,8 +53,8 @@ Channel.prototype.broadcast = function(type, obj) {
 /**
  * Send obj to subscriber identified by id value
  */
-Channel.prototype.send = function(subscriber_id, type, obj) {
-    var subscriber = this._subscribers[subscriber_id];
+Channel.prototype.send = function(user, type, obj) {
+    var subscriber = this._subscribers[user.id];
     if (subscriber) {
         if ('history' == type) {
             obj = this._history;
