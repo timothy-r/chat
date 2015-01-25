@@ -4,18 +4,21 @@ var SocketServer = require('websocket').server,
     http = require('http'),
     Channels = require('./lib/channels'),
     UserStore = require('./lib/user_store'),
-    Message = require('./lib/message');
+    Message = require('./lib/message'),
+    Config = require('./config');
 
-// connect clients to the lobby before they pick a room
-// configure default set of rooms, lobby is where interactive clients can enter
-var current = 'lobby';
-Channels.add(current);
+// connect clients to the 'current' channel before they pick a room
+for(var c in Config.channels.all) {
+    Channels.add(Config.channels.all[c]);
+}
 
-// Optional. You will see this name in eg. 'ps' or 'top' command
-process.title = 'pub-sub.server';
+var current = Config.channels.current;
+
+// This name is shown in 'ps' or 'top' command
+process.title = Config.process.title;
 
 // Port where we'll run the websocket server - configure via an env var
-var socket_port = 1337;
+var socket_port = Config.port;
 
 function logMessage(msg) {
     console.log((new Date()) + ' ' + msg);
@@ -87,7 +90,7 @@ socket_server.on('request', function(request) {
 
     // client disconnected
     connection.on('close', function(connection) {
-        if (user.name !== false && user.colour !== false) {
+        if (user) {
             logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
             // remove user from the list of connected clients
             Channels.get(current).remove(user);
