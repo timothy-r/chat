@@ -8,7 +8,7 @@ var SocketServer = require('websocket').server,
 var current = 'lobby';
 
 /**
- * Implement a room container?
+ * Implement a channel container rather than just an object/hash
  */
 var channels = {
     'lobby' : new Channel(current)
@@ -20,9 +20,6 @@ process.title = 'pub-sub.server';
 // Port where we'll run the websocket server - configure via an env var
 var socket_port = 1337;
 
-/**
- * Helper function for escaping input strings
- */
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;')
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -77,12 +74,11 @@ socket_server.on('request', function(request) {
 
     // user sent some message
     connection.on('message', function(message) {
-
         var payload = JSON.parse(message.utf8Data);
 
         if (message.type === 'utf8') { // accept only text
             // test payload.action
-            // may be post-message, set-name, enter-room, list-rooms, add-room
+            // may be post-message, set-name (ie log in), subcribe, list-channels, add-channel
             switch (payload.action) {
                 case 'set-name':
                     userName = htmlEntities(payload.body);
@@ -107,7 +103,7 @@ socket_server.on('request', function(request) {
         }
     });
 
-    // user disconnected
+    // client disconnected
     connection.on('close', function(connection) {
         if (userName !== false && userColor !== false) {
             logMessage('Peer ' + connection.remoteAddress + ' disconnected.');
