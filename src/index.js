@@ -8,7 +8,7 @@ var SocketServer = require('websocket').server,
     Config = require('./config');
 
 // connect clients to the 'current' channel before they pick a room
-for(var c in Config.channels.all) {
+for (var c in Config.channels.all) {
     Channels.add(Config.channels.all[c]);
 }
 
@@ -44,8 +44,8 @@ socket_server.on('request', function(request) {
     logMessage('Connection from origin ' + request.origin + ' current = ' + current );
 
     var connection = request.accept(null, request.origin);
-    var client = ClientStore.create();
-    Channels.get(current).subscribe(client, connection);
+    var client = ClientStore.create(connection);
+    Channels.get(current).subscribe(client);
 
     // send chat history - only do this when entering a different room, not lobby?
     Channels.get(current).send(client, 'history');
@@ -103,7 +103,7 @@ socket_server.on('request', function(request) {
     connection.on('close', function(connection) {
         if (client) {
             logMessage('Client ' + client.name + ' disconnected.');
-            // remove client from the list of connected clients
+            // remove client from the list of connected clients - it could be subscribed to multiple channels
             Channels.get(current).remove(client);
         }
     });
