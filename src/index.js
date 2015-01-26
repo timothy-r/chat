@@ -36,8 +36,11 @@ var socket_server = new SocketServer({
 
 // Called on connecting to web socket server
 socket_server.on('request', function(request) {
+    
+    // get the channel id for the current configured channel
+    var current = Channels.getByName(Config.channels.current).id;
+    logMessage('current = ' + current);
 
-    var current = Config.channels.current;
     logMessage('Connection from origin ' + request.origin + ' current = ' + current );
 
     var connection = request.accept(null, request.origin);

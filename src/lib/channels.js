@@ -25,18 +25,20 @@ exports.get = function(id) {
 }
 
 exports.getByName = function(name) {
-   for (var c in channels) {
-        if (channels[c].name == name) {
-            return channels[c];
-        }
-   }
+
+   return _.filter(
+       _.values(channels), _.matches( {name: name} )
+   )[0];
 }
 
 /**
- * List the names of Channels that can then be used to access them via get()
+ * List the ids and names of Channels that can then be used to access them via get()
  */
 exports.list = function() {
-    return Object.keys(channels);
+    
+    return _.map(_.values(channels), function(c) {
+        return {id: c.id, name: c.name}; 
+    });
 }
 
 /**
