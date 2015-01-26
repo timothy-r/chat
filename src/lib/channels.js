@@ -2,9 +2,10 @@
 
 var Channel = require('./channel'),
     _ = require('underscore');
+
 /*
  * Channel container
- * add, list, get, remove
+ * Suports add, list, get, remove methods
 */
 var channels = {};
 
@@ -25,7 +26,6 @@ exports.get = function(id) {
 }
 
 exports.getByName = function(name) {
-
    return _.filter(
        _.values(channels), _.matches( {name: name} )
    )[0];
@@ -35,14 +35,13 @@ exports.getByName = function(name) {
  * List the ids and names of Channels that can then be used to access them via get()
  */
 exports.list = function() {
-    
     return _.map(_.values(channels), function(c) {
         return {id: c.id, name: c.name}; 
     });
 }
 
 /**
- * Remove Channel with name from collection
+ * Remove Channel with id from collection
  * return the removed Channel
  */
 exports.remove = function(id) {
