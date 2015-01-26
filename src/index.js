@@ -12,10 +12,6 @@ for(var c in Config.channels.all) {
     Channels.add(Config.channels.all[c]);
 }
 
-// current is shared across all clients...
-// either store current room in user or in the client itself
-//var current = Config.channels.current;
-
 // This name is shown in 'ps' or 'top' command
 process.title = Config.process.title;
 
