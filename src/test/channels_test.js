@@ -22,11 +22,12 @@ describe('Channels', function() {
             assert.equal(name, channel.name);
         });
     });
+
     describe('get', function() {
-        it('should return a Channel instance', function() {
+        it('should return a Channel instance for an id', function() {
             var name = 'chann', history = [];
             var channel = Channels.add(name, history);
-            var result = Channels.get(name);
+            var result = Channels.get(channel.id);
             assert.equal(channel, result);
         });
         it('should return null when no channels exist', function() {
@@ -41,6 +42,7 @@ describe('Channels', function() {
             assert.equal(null, result);
         });
     });
+
     describe('list', function() {
         it('should return an empty array when no Channel exists', function() {
             var result = Channels.list();
@@ -51,11 +53,13 @@ describe('Channels', function() {
             var name = 'chann', history = [];
             var channel = Channels.add(name, history);
             var result = Channels.list();
+
             assert(_.isArray(result));
             assert.equal(1, result.length);
-            assert.equal(name, result[0]);
+            assert.equal(channel.id, result[0]);
         });
     });
+
     describe('clear', function() {
         it('should clear the channels', function() {
             var name = 'chann', history = [];
@@ -65,6 +69,7 @@ describe('Channels', function() {
             assert.equal(0, result.length);
         });
     });
+
     describe('remove', function() {
         it('should return null when Channel does not exist', function() {
             var result = Channels.remove('xyz');
@@ -73,10 +78,10 @@ describe('Channels', function() {
         it('should return Channel when removed', function() {
             var name = 'chann', history = [];
             var channel = Channels.add(name, history);
-            var result = Channels.remove(name);
+            var result = Channels.remove(channel.id);
             assert.equal(name, result.name);
             // test that channel was removed
-            var result_2 = Channels.get(name);
+            var result_2 = Channels.get(channel.id);
             assert.equal(null, result_2);
         });
     });
