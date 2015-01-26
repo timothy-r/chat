@@ -6,6 +6,6 @@ module.exports.create = function createMessage(body, client) {
     time: (new Date()).getTime(),
     body: body,
     author: client.name,
-    color: client.colour
+    colour: client.colour
   };
 }
