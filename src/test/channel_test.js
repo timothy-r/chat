@@ -1,6 +1,7 @@
 var Channel = require('../lib/channel'),
     assert = require('assert'),
-    Mockman = require('mockman');
+    Mockman = require('mockman'),
+    _ = require('underscore');
 
 describe('Channel', function() {
     
@@ -17,6 +18,11 @@ describe('Channel', function() {
             var name = 'chan.1';
             var channel = new Channel(name);
             assert.equal(name, channel.name);
+        });
+        it('should have an id', function() {
+            var name = 'Channel Y';
+            var channel = new Channel(name);
+            assert(_.has(channel, 'id'));
         });
     });
 

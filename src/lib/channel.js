@@ -14,6 +14,13 @@ function Channel(name, history) {
         enumerable: true,
         value: name 
     });
+
+    Object.defineProperty(this, 'id', {
+        writable: false,
+        configurable: false,
+        enumerable: true,
+        value: MD5(Math.random())
+    });
     
     // confirm that history param is an array
     this._history = _.isArray(history) ? history : [];
