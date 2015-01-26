@@ -15,9 +15,14 @@ var Colour = require('./colour'),
  * name field is null
  */
 exports.create = function(connection) {
-
+    // @todo write a client class
     var client = {
-        name: null
+        name: null,
+        send: function(type, obj) {
+            connection.sendUTF(
+                JSON.stringify({ type: type, data: obj })
+            );
+        }
     };
 
     Object.defineProperty(client, 'colour', {
