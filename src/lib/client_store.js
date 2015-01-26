@@ -10,11 +10,12 @@ var Colour = require('./colour'),
  */
 
 /**
- * Generate a new Client object
+ * Generate a new Client object with this connection
  * set a colour & and id field
  * name field is null
  */
-exports.create = function() {
+exports.create = function(connection) {
+
     var client = {
         name: null
     };
@@ -31,6 +32,13 @@ exports.create = function() {
         configurable: false,
         enumerable: true,
         value: MD5(Math.random())
+    });
+
+    Object.defineProperty(client, 'connection', {
+        writable: false,
+        configurable: false,
+        enumerable: true,
+        value: connection
     });
     
     clients[client.id] = client;
