@@ -61,9 +61,9 @@ socket_server.on('request', function(request) {
                 case 'set-name':
                     // log in
                     user.name = payload.body;
-                    // get a color and send it to the client
-                    Channels.get(current).send(user, 'color', user.colour);
-                    logMessage('User is known as: ' + user.name + ' with ' + user.colour + ' color.');
+                    // get a colour and send it to the client
+                    Channels.get(current).send(user, 'colour', user.colour);
+                    logMessage('User logged in : ' + user.name + ' with ' + user.colour + ' colour.');
 
                     var obj = Message.create('User ' + user.name + ' connected', user);
                     Channels.get(current).broadcast('message', obj);
@@ -79,11 +79,13 @@ socket_server.on('request', function(request) {
                     var obj = Message.create(payload.body, user);
 
                     // get room name from payload? we have it here in the connection as well
+                    // clients should be able to post to any named channel
                     Channels.get(current).broadcast('message', obj);
                     break;
                 case 'list-channels':
                     var obj = Message.create(Channels.list(), user);
                     // only send to subscriber that made the request
+                    // channel-list doesn't really go to a channel, but rather a client
                     Channels.get(current).send(user, 'channel-list', obj);
                     break;
                 case 'subscribe':
