@@ -31,8 +31,8 @@ function Channel(name, history) {
 /**
  * Add a subscriber, return its identifier
  */
-Channel.prototype.subscribe = function(client, subscriber) {
-    this._subscribers[client.id] = subscriber;
+Channel.prototype.subscribe = function(client, connection) {
+    this._subscribers[client.id] = connection;
     return client.id;
 };
 
@@ -49,11 +49,14 @@ Channel.prototype.remove = function(client) {
  * Send a json object to all subscribers
  */
 Channel.prototype.broadcast = function(type, obj) {
-    var json = JSON.stringify({ type: type, data: obj });
+    var json = JSON.stringify(
+        { type: type, data: obj }
+    );
+
     // store the broadcast object in history
     this._history.push(obj);
-    for (var s in this._subscribers) {
-         this._subscribers[s].sendUTF(json);
+    for (var conn in this._subscribers) {
+         this._subscribers[conn].sendUTF(json);
     }
 };
 
@@ -61,13 +64,14 @@ Channel.prototype.broadcast = function(type, obj) {
  * Send obj to subscriber identified by id value
  */
 Channel.prototype.send = function(client, type, obj) {
-    var subscriber = this._subscribers[client.id];
-    if (subscriber) {
+    var connection = this._subscribers[client.id];
+
+    if (connection) {
         if ('history' == type) {
             obj = this._history;
             // check history contains at least one item
         }
-        subscriber.sendUTF(
+        connection.sendUTF(
             JSON.stringify({ type: type, data: obj })
         );
         return true;
