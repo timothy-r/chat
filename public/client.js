@@ -2,15 +2,13 @@ $(function () {
     "use strict";
 
     // for better performance - to avoid searching in DOM
-    var content = $('#content');
-    var input = $('#input');
-    var status = $('#status');
-    var rooms = $('#rooms');
+    var content = $('#content'),
+        input = $('#input'),
+        status = $('#status'),
+        channels = $('#channels');
     
-    // store colour and name as a client object
-    var myColour = false, myName = false;
-
-    var room = 'lobby', room_list = [];
+    var channel = 'lobby', 
+        channel_list = [];
 
     // if user is running mozilla then use it's built-in WebSocket
     window.WebSocket = window.WebSocket || window.MozWebSocket;
@@ -23,20 +21,25 @@ $(function () {
     }
 
     // open connection - parameterize the endpoint
-    var connection = new WebSocket('ws://192.168.59.103:1337');
+    var client = {
+        name: false,
+        email: false,
+        colour: false,
+        connection: new WebSocket('ws://192.168.59.103:1337')
+    };
 
-    connection.onopen = function () {
+    client.connection.onopen = function () {
         // first we want users to enter their names
         input.removeAttr('disabled');
         status.text('Choose name:');
     };
 
-    connection.onerror = function (error) {
+    client.connection.onerror = function (error) {
         content.html($('<p>', { text: 'There\'s a problem with your connection or the server is down.' } ));
     };
 
     // handle incoming messages to the socket
-    connection.onmessage = function (message) {
+    client.connection.onmessage = function (message) {
         try {
             var json = JSON.parse(message.data);
         } catch (e) {
@@ -44,11 +47,11 @@ $(function () {
             return;
         }
         
-        displayRoomName(room);
+        displayRoomName(channel);
 
         if (json.type === 'colour') {
-            myColour = json.data;
-            status.text(myName + ': ').css('color', myColour);
+            client.colour = json.data;
+            status.text(client.name + ': ').css('color', client.colour);
             input.removeAttr('disabled').focus();
         } else if (json.type === 'history') { // entire message history
             // insert every single message to the chat window
@@ -61,30 +64,30 @@ $(function () {
             addMessage(json.data.author, json.data.body,
                        json.data.colour, new Date(json.data.time));
         } else if (json.type == 'channel-list') {
-            // clear rooms list and re-populate
-            rooms.html('');
-            room_list = json.data.body;
+            // clear channels list and re-populate
+            channels.html('');
+            channel_list = json.data.body;
 
-            for (var r in room_list) {
-                // attach listener to each room item to enable room switching
-                var rm = room_list[r];
-                console.log(rm);
-                rooms.append('<li><a id="' + rm.id + '" href="#">' + rm.name + '</a></li>');
+            for (var r in channel_list) {
+                // attach listener to each channel item to enable channel switching
+                var chan = channel_list[r];
+                console.log(chan);
+                channels.append('<li><a id="' + chan.id + '" href="#">' + chan.name + '</a></li>');
                 
-                $( "#" + rm.id ).click(function(e) {
-                    // send a room object or just its id? 
-                    var new_room = e.target.id;
-                    console.log('element ' + e.target.id + ' clicked. room = ' + new_room);
-                    connection.send(
+                $( "#" + chan.id ).click(function(e) {
+                    // send a channel object or just its id? 
+                    var new_channel = e.target.id;
+                    console.log('element ' + e.target.id + ' clicked. channel = ' + new_channel);
+                    client.connection.send(
                         JSON.stringify(
-                            { body: new_room, action: 'subscribe', room: new_room }
+                            { body: new_channel, action: 'subscribe', channel: new_channel }
                         )
                     );
-                    // clear the message window in anticipation of the new room content
+                    // clear the message window in anticipation of the new channel content
                     content.html('');
-                    room = new_room;
-                    // show the room's name 
-                    displayRoomName(room);
+                    channel = new_channel;
+                    // show the channel's name 
+                    displayRoomName(channel);
                 });
             }
         }
@@ -105,14 +108,14 @@ $(function () {
             
             var action = 'post-message';
             // send name as the first message
-            if (myName === false) {
-                myName = msg;
+            if (client.name === false) {
+                client.name = msg;
                 action = 'set-name';
             }
             // send the message as json
-            connection.send(
+            client.connection.send(
                 JSON.stringify(
-                    { body: msg, room: room, action: action }
+                    { body: msg, channel: channel, action: action }
                 )
             );
 
@@ -130,7 +133,7 @@ $(function () {
      * something is wrong.
      */
     setInterval(function() {
-        if (connection.readyState !== 1) {
+        if (client.connection.readyState !== 1) {
             status.text('Error');
             input.val('Unable to communicate with the WebSocket server.');
         }
@@ -147,10 +150,10 @@ $(function () {
     };
 
     function displayRoomName(id) {
-        // show the room's name 
-        for (var r in room_list) {
-            if (room_list[r].id == id) {
-                $('#room-name').html(room_list[r].name);
+        // show the channel's name 
+        for (var r in channel_list) {
+            if (channel_list[r].id == id) {
+                $('#channel-name').html(channel_list[r].name);
              }
         }
     }

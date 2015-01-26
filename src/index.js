@@ -47,7 +47,7 @@ socket_server.on('request', function(request) {
     var client = ClientStore.create(connection);
     Channels.get(current).subscribe(client);
 
-    // send chat history - only do this when entering a different room, not lobby?
+    // send chat history - only do this when entering a different room and after log in, not lobby?
     Channels.get(current).send(client, 'history');
 
     // client sent some message

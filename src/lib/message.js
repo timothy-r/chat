@@ -2,10 +2,10 @@
  * Create message objects to send to clients
  */
 module.exports.create = function createMessage(body, client) {
-  return {
-    time: (new Date()).getTime(),
-    body: body,
-    author: client.name,
-    colour: client.colour
-  };
+    return {
+        time: (new Date()).getTime(),
+        body: body,
+        author: client.name,
+        colour: client.colour
+    };
 }
