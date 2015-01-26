@@ -3,7 +3,7 @@
 var SocketServer = require('websocket').server,
     http = require('http'),
     Channels = require('./lib/channels'),
-    UserStore = require('./lib/user_store'),
+    ClientStore = require('./lib/client_store'),
     Message = require('./lib/message'),
     Config = require('./config');
 
@@ -44,13 +44,13 @@ socket_server.on('request', function(request) {
     logMessage('Connection from origin ' + request.origin + ' current = ' + current );
 
     var connection = request.accept(null, request.origin);
-    var user = UserStore.create();
-    Channels.get(current).subscribe(user, connection);
+    var client = ClientStore.create();
+    Channels.get(current).subscribe(client, connection);
 
     // send chat history - only do this when entering a different room, not lobby?
-    Channels.get(current).send(user, 'history');
+    Channels.get(current).send(client, 'history');
 
-    // user sent some message
+    // client sent some message
     connection.on('message', function(message) {
         var payload = JSON.parse(message.utf8Data);
 
@@ -60,40 +60,40 @@ socket_server.on('request', function(request) {
             switch (payload.action) {
                 case 'set-name':
                     // log in
-                    user.name = payload.body;
+                    client.name = payload.body;
                     // get a colour and send it to the client
-                    Channels.get(current).send(user, 'colour', user.colour);
-                    logMessage('User logged in : ' + user.name + ' with ' + user.colour + ' colour.');
+                    Channels.get(current).send(client, 'colour', client.colour);
+                    logMessage('Client logged in : ' + client.name + ' with ' + client.colour + ' colour.');
 
-                    var obj = Message.create('User ' + user.name + ' connected', user);
+                    var obj = Message.create('Client ' + client.name + ' connected', client);
                     Channels.get(current).broadcast('message', obj);
 
-                    var obj = Message.create(Channels.list(), user);
+                    var obj = Message.create(Channels.list(), client);
                     // send the room list to the client
-                    Channels.get(current).send(user, 'channel-list', obj);
+                    Channels.get(current).send(client, 'channel-list', obj);
                     break;
 
                 case 'post-message':
-                    logMessage('Received Message from ' + user.name + ': ' + JSON.stringify(payload));
+                    logMessage('Received Message from ' + client.name + ': ' + JSON.stringify(payload));
 
-                    var obj = Message.create(payload.body, user);
+                    var obj = Message.create(payload.body, client);
 
                     // get room name from payload? we have it here in the connection as well
                     // clients should be able to post to any named channel
                     Channels.get(current).broadcast('message', obj);
                     break;
                 case 'list-channels':
-                    var obj = Message.create(Channels.list(), user);
+                    var obj = Message.create(Channels.list(), client);
                     // only send to subscriber that made the request
                     // channel-list doesn't really go to a channel, but rather a client
-                    Channels.get(current).send(user, 'channel-list', obj);
+                    Channels.get(current).send(client, 'channel-list', obj);
                     break;
                 case 'subscribe':
-                    logMessage('Subscribe ' + user.name + ' to room ' + payload.body);
-                    var conn = Channels.get(current).remove(user);
+                    logMessage('Subscribe ' + client.name + ' to room ' + payload.body);
+                    var conn = Channels.get(current).remove(client);
                     current = payload.body;
-                    Channels.get(current).subscribe(user, conn);
-                    Channels.get(current).send(user, 'history');
+                    Channels.get(current).subscribe(client, conn);
+                    Channels.get(current).send(client, 'history');
                     break;
             }
         }
@@ -101,10 +101,10 @@ socket_server.on('request', function(request) {
 
     // client disconnected
     connection.on('close', function(connection) {
-        if (user) {
-            logMessage('Client ' + user.name + ' disconnected.');
-            // remove user from the list of connected clients
-            Channels.get(current).remove(user);
+        if (client) {
+            logMessage('Client ' + client.name + ' disconnected.');
+            // remove client from the list of connected clients
+            Channels.get(current).remove(client);
         }
     });
 });

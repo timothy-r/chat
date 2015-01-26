@@ -29,21 +29,21 @@ describe('Channel', function() {
     describe('subscribe', function() {
         it('should add a subscriber', function() {
             var channel = new Channel('test');
-            var user = {id: 'abcde', name: 'test', colour: 'red'};
+            var client = {id: 'abcde', name: 'test', colour: 'red'};
             var subscriber = {};
-            var id = channel.subscribe(user, subscriber);
-            assert(user.id == id);
+            var id = channel.subscribe(client, subscriber);
+            assert(client.id == id);
         });
     });
 
     describe('remove', function() {
         it('should remove a subscriber', function() {
             var channel = new Channel('test');
-            var user = {id: 'abcde', name: 'test', colour: 'red'};
+            var client = {id: 'abcde', name: 'test', colour: 'red'};
             var obj = {};
             var subscriber = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
-            channel.subscribe(user, subscriber);
-            var result = channel.remove(user);
+            channel.subscribe(client, subscriber);
+            var result = channel.remove(client);
             assert.equal(subscriber, result);
             // confirm that removed subscriber does not get called
             channel.broadcast('test', obj);
@@ -55,9 +55,9 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var user = {id: 'abcde', name: 'test', colour: 'red'};
+            var client = {id: 'abcde', name: 'test', colour: 'red'};
             var subscriber = Mockman.instance('subscriber').shouldReceive('sendUTF').once().getMock()();
-            channel.subscribe(user, subscriber);
+            channel.subscribe(client, subscriber);
             channel.broadcast(type, obj);
         });
     });
@@ -67,15 +67,15 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var user_1 = {id: 'abcde', name: 'test', colour: 'red'};
+            var client_1 = {id: 'abcde', name: 'test', colour: 'red'};
             var sub_1 = Mockman.instance('subscriber').shouldReceive('sendUTF').once().getMock()();
-            var id_1 = channel.subscribe(user_1, sub_1);
+            var id_1 = channel.subscribe(client_1, sub_1);
 
-            var user_2 = {id: 'xyz', name: 'test', colour: 'red'};
+            var client_2 = {id: 'xyz', name: 'test', colour: 'red'};
             var sub_2 = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
-            var id_2 = channel.subscribe(user_2, sub_1);
+            var id_2 = channel.subscribe(client_2, sub_1);
             
-            var result = channel.send(user_1, type, obj);
+            var result = channel.send(client_1, type, obj);
             assert(result);
         });
 
@@ -83,8 +83,8 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var user = { id: 'x'}
-            var result = channel.send(user, type, obj);
+            var client = { id: 'x'}
+            var result = channel.send(client, type, obj);
             assert.equal(false, result);
         });
 
@@ -92,12 +92,12 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var user_1 = {id: 'abcde', name: 'test', colour: 'red'};
+            var client_1 = {id: 'abcde', name: 'test', colour: 'red'};
             var sub = Mockman.instance('subscriber').shouldReceive('sendUTF').never().getMock()();
-            channel.subscribe(user_1, sub);
+            channel.subscribe(client_1, sub);
             
-            var user_2 = { id: 'not an id'}
-            var result = channel.send(user_2, type, obj);
+            var client_2 = { id: 'not an id'}
+            var result = channel.send(client_2, type, obj);
             assert.equal(false, result);
         });
     });

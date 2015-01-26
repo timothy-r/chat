@@ -31,17 +31,17 @@ function Channel(name, history) {
 /**
  * Add a subscriber, return its identifier
  */
-Channel.prototype.subscribe = function(user, subscriber) {
-    this._subscribers[user.id] = subscriber;
-    return user.id;
+Channel.prototype.subscribe = function(client, subscriber) {
+    this._subscribers[client.id] = subscriber;
+    return client.id;
 };
 
 /**
  * Remove the subscriber with this id, return the subscriber object
  */
-Channel.prototype.remove = function(user) {
-    var sub = this._subscribers[user.id];
-    delete this._subscribers[user.id];
+Channel.prototype.remove = function(client) {
+    var sub = this._subscribers[client.id];
+    delete this._subscribers[client.id];
     return sub;
 };
 
@@ -60,8 +60,8 @@ Channel.prototype.broadcast = function(type, obj) {
 /**
  * Send obj to subscriber identified by id value
  */
-Channel.prototype.send = function(user, type, obj) {
-    var subscriber = this._subscribers[user.id];
+Channel.prototype.send = function(client, type, obj) {
+    var subscriber = this._subscribers[client.id];
     if (subscriber) {
         if ('history' == type) {
             obj = this._history;
