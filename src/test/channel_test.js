@@ -29,51 +29,54 @@ describe('Channel', function() {
     describe('subscribe', function() {
         it('should add a connection', function() {
             var channel = new Channel('test');
-            var client = {id: 'abcde', name: 'test', colour: 'red'};
-            var connection = {};
-            var id = channel.subscribe(client, connection);
+            var connection = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
+            var client = {id: 'abcde', name: 'test', colour: 'red', connection: connection};
+            var id = channel.subscribe(client);
             assert(client.id == id);
         });
     });
 
     describe('remove', function() {
-        it('should remove a connection', function() {
+        it('should remove a client', function() {
             var channel = new Channel('test');
-            var client = {id: 'abcde', name: 'test', colour: 'red'};
-            var obj = {};
+            var obj = { body: 'message' };
             var connection = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
-            channel.subscribe(client, connection);
+            var client = { id: 'abcde', name: 'test', colour: 'red', connection: connection };
+            channel.subscribe(client);
+
+            // should return true
             var result = channel.remove(client);
-            assert.equal(connection, result);
+            assert(result);
+
             // confirm that removed connection does not get called
             channel.broadcast('test', obj);
         });
     });
 
     describe('broadcast', function() {
-        it('should send json message to all connections', function() {
+        it('should send json message to all clients', function() {
             var channel = new Channel('test');
             var type = 'message';
-            var obj = {};
-            var client = {id: 'abcde', name: 'test', colour: 'red'};
+            var obj = {body: "message text"};
             var connection = Mockman.instance('connection').shouldReceive('sendUTF').once().getMock()();
-            channel.subscribe(client, connection);
+            var client = {id: 'abcde', name: 'test', colour: 'red', connection: connection};
+            channel.subscribe(client);
             channel.broadcast(type, obj);
         });
     });
 
     describe('send', function() {
-        it('should send an object to only one connection', function() {
+        it('should send an object to only one client', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var client_1 = {id: 'abcde', name: 'test', colour: 'red'};
-            var sub_1 = Mockman.instance('connection').shouldReceive('sendUTF').once().getMock()();
-            var id_1 = channel.subscribe(client_1, sub_1);
+            var connection_1 = Mockman.instance('connection').shouldReceive('sendUTF').once().getMock()();
+            var client_1 = {id: 'abcde', name: 'test', colour: 'red', connection: connection_1 };
+            var id_1 = channel.subscribe(client_1);
 
-            var client_2 = {id: 'xyz', name: 'test', colour: 'red'};
-            var sub_2 = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
-            var id_2 = channel.subscribe(client_2, sub_1);
+            var connection_2 = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
+            var client_2 = {id: 'abcde', name: 'test', colour: 'red', connection: connection_2 };
+            var id_2 = channel.subscribe(client_2);
             
             var result = channel.send(client_1, type, obj);
             assert(result);
@@ -92,9 +95,9 @@ describe('Channel', function() {
             var channel = new Channel('test');
             var type = 'message';
             var obj = {};
-            var client_1 = {id: 'abcde', name: 'test', colour: 'red'};
-            var sub = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
-            channel.subscribe(client_1, sub);
+            var connection = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
+            var client_1 = {id: 'abcde', name: 'test', colour: 'red', connection: connection};
+            channel.subscribe(client_1);
             
             var client_2 = { id: 'not an id'}
             var result = channel.send(client_2, type, obj);

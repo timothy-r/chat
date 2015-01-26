@@ -31,47 +31,51 @@ function Channel(name, history) {
 /**
  * Add a subscriber, return its identifier
  */
-Channel.prototype.subscribe = function(client, connection) {
-    this._subscribers[client.id] = connection;
+Channel.prototype.subscribe = function(client) {
+    this._subscribers[client.id] = client;
     return client.id;
 };
 
 /**
- * Remove the subscriber with this id, return the subscriber object
+ * Remove the client with this id, return the client object
  */
 Channel.prototype.remove = function(client) {
-    var sub = this._subscribers[client.id];
-    delete this._subscribers[client.id];
-    return sub;
+    if (_.has(this._subscribers, client.id)){
+        delete this._subscribers[client.id];
+        return true;
+    } else {
+        return false;
+    }
 };
 
 /**
- * Send a json object to all subscribers
+ * Send a json object to all subscribed clients
  */
 Channel.prototype.broadcast = function(type, obj) {
     var json = JSON.stringify(
         { type: type, data: obj }
     );
 
-    // store the broadcast object in history
+    // store the broadcast object in history, store type too?
     this._history.push(obj);
-    for (var conn in this._subscribers) {
-         this._subscribers[conn].sendUTF(json);
+
+    for (var c in this._subscribers) {
+         this._subscribers[c].connection.sendUTF(json);
     }
 };
 
 /**
- * Send obj to subscriber identified by id value
+ * Send obj to client identified by id value
  */
 Channel.prototype.send = function(client, type, obj) {
-    var connection = this._subscribers[client.id];
+    var c = this._subscribers[client.id];
 
-    if (connection) {
+    if (c) {
         if ('history' == type) {
             obj = this._history;
             // check history contains at least one item
         }
-        connection.sendUTF(
+        client.connection.sendUTF(
             JSON.stringify({ type: type, data: obj })
         );
         return true;
