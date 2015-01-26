@@ -24,6 +24,14 @@ exports.get = function(id) {
     return channels[id];
 }
 
+exports.getByName = function(name) {
+   for (var c in channels) {
+        if (channels[c].name == name) {
+            return channels[c];
+        }
+   }
+}
+
 /**
  * List the names of Channels that can then be used to access them via get()
  */
