@@ -1,5 +1,6 @@
 var ClientStore = require('../lib/client_store.js'),
     assert = require('assert'),
+    Mockman = require('mockman'),
     _ = require('underscore');
 
 describe('ClientStore', function() {
@@ -9,9 +10,18 @@ describe('ClientStore', function() {
         done();
     });
 
+    /**
+     * Ensure mock asserts are processed
+     */
+    afterEach(function(done) {
+        Mockman.close();
+        done();
+    });
+
     describe('create', function() {
-        it('should return a client object', function() {
-            var client = ClientStore.create();
+        it('should return a client object with a connection', function() {
+            var connection = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
+            var client = ClientStore.create(connection);
             assert(_.has(client, 'name'));
             assert.equal(null, client.name);
             
@@ -20,12 +30,16 @@ describe('ClientStore', function() {
 
             assert(_.has(client, 'id'));
             assert(_.isString(client.id));
+
+            assert(_.has(client, 'connection'));
+            assert.equal(connection, client.connection);
         });
     });
 
     describe('update', function() {
         it('should update clients objects in the store', function() {
-            var client = ClientStore.create();
+            var connection = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
+            var client = ClientStore.create(connection);
             var name = 'Terry';
             client.name = name;
             ClientStore.update(client);
@@ -42,7 +56,8 @@ describe('ClientStore', function() {
         });
 
         it('should return null when not found', function() {
-            var client = ClientStore.create();
+            var connection = Mockman.instance('connection').shouldReceive('sendUTF').never().getMock()();
+            var client = ClientStore.create(connection);
             client.name = 'Donny';
             ClientStore.update(client);
             var result = ClientStore.get('Other name');
