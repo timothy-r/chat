@@ -39,6 +39,7 @@ exports.create = function() {
 
 /**
  * Return a User in the store with this name
+ * change to getByName and implement get to accept an id string
  */
 exports.get = function(name) {
     // iterate over users looking for one with this name
