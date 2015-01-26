@@ -56,13 +56,13 @@ $(function () {
         } else if (json.type === 'history') { // entire message history
             // insert every single message to the chat window
             for (var i=0; i < json.data.length; i++) {
-                addMessage(json.data[i].author, json.data[i].body,
-                           json.data[i].colour, new Date(json.data[i].time));
+                addMessage(json.data[i].client.name, json.data[i].body,
+                           json.data[i].client.colour, new Date(json.data[i].time));
             }
         } else if (json.type === 'message') {
             input.removeAttr('disabled');
-            addMessage(json.data.author, json.data.body,
-                       json.data.colour, new Date(json.data.time));
+            addMessage(json.data.client.name, json.data.body,
+                       json.data.client.colour, new Date(json.data.time));
         } else if (json.type == 'channel-list') {
             // clear channels list and re-populate
             channels.html('');
