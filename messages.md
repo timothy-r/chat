@@ -1,13 +1,13 @@
-Try to standarise messages between client and server.
+#Standarise messages between client and server
 
-* action, indicates type of message
-* body is always a json object with different contents depending on action
-* time
-* client an object with client details, may be missing? or use server details for non-client originating messages
-* channel the affected channel, may be missing?
+* **action**, indicates type of message
+* **body** is always a json object with different contents depending on action
+* **time**
+* **client** an object with client details, may be missing? or use server details for non-client originating messages
+* **channel** the affected channel, may be missing?
 
-// message with text from one client to a channel
-{
+##Message with text from one client to a channel
+    {
     action: "post-message",
     body: {
         text: "the message"
@@ -22,12 +22,12 @@ Try to standarise messages between client and server.
         email: "email",
         colour: "red"
     }   
-}
+    }
 
-// message from server to client after getting data from storage
+##Message from server to client after getting data from storage
 // could be used by clients to populate buddy lists?
 // update name / colour / avatar
-{
+    {
     action: "update-client",
     body: {
         name: "x",
@@ -39,10 +39,10 @@ Try to standarise messages between client and server.
     client : {
 
     }
-}
+    }
 
-// on log in from client to server
-{
+##On log in from client to server
+    {
     action: "log-in",
     body: {
         name: "the client name",?
@@ -54,10 +54,10 @@ Try to standarise messages between client and server.
         email: "the client email",
         colour: ""
     }
-}
+    }
 
-// from server to client, not channel
-{
+##From server to client, not channel
+    {
     action: "set-channels",
     body: {
         channels: [{name:"x", id: "1234"} {name: "y", id: "5678"}]
@@ -70,8 +70,8 @@ Try to standarise messages between client and server.
     }
 }
 
-// subscribe to channel, from client to server
-{
+##Subscribe to channel, from client to server
+    {
     action: "subscribe",
     body: {
         channel : "id"
@@ -81,11 +81,11 @@ Try to standarise messages between client and server.
         name: "x",
         id: "y"
     }
-}
+    }
 
-// history, server to client on subscribe
-// really just an array of posts
-{
+##History, server to client on subscribe
+Really just an array of posts
+    {
     action: "set-history",
     body: {
         posts: [
@@ -100,6 +100,6 @@ Try to standarise messages between client and server.
         id: "server id",
         name: "server name"
     }
-}
+    }
 
 
