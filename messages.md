@@ -1,4 +1,4 @@
-#Standarise messages between client and server
+#Standardise messages between client and server
 
 * **action**, indicates type of message
 * **body** is always a json object with different contents depending on action
@@ -46,12 +46,12 @@
     {
         action: "log-in",
         body: {
-            name: "the client name",?
+            name: "the client name",
             email: "the client email"
         },
         client: {
             id: "",
-            name: "the client name",?
+            name: "the client name",
             email: "the client email",
             colour: ""
         }
@@ -61,12 +61,12 @@
     {
         action: "set-channels",
         body: {
-            channels: [{name:"x", id: "1234"} {name: "y", id: "5678"}]
+            channels: [ {name:"x", id: "1234"}, {name: "y", id: "5678"} ]
         },
-        client: { / NA ??
+        client: {
             id: "id",
-            name: "xx",
-            email: "yy"
+            name: "server-name",
+            email: ""
         }
 }
 
@@ -78,8 +78,7 @@
         },
         client: {
             id: "id",
-            name: "x",
-            id: "y"
+            name: "x"
         }
     }
 
