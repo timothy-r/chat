@@ -56,13 +56,11 @@ $(function () {
         } else if (json.type === 'history') { // entire message history
             // insert every single message to the chat window
             for (var i=0; i < json.data.length; i++) {
-                addMessage(json.data[i].client.name, json.data[i].body,
-                           json.data[i].client.colour, new Date(json.data[i].time));
+                addMessage(json.data[i]);
             }
         } else if (json.type === 'message') {
             input.removeAttr('disabled');
-            addMessage(json.data.client.name, json.data.body,
-                       json.data.client.colour, new Date(json.data.time));
+            addMessage(json.data);
         } else if (json.type == 'channel-list') {
             // clear channels list and re-populate
             channels.html('');
@@ -142,11 +140,12 @@ $(function () {
     /**
      * Add message to the chat window
      */
-    function addMessage(author, message, colour, dt) {
-        content.prepend('<p><span style="color:' + colour + '">' + author + '</span> @ ' +
+    function addMessage(msg) {
+        var dt = new Date(msg.time);
+        content.prepend('<p><span style="color:' + msg.client.colour + '">' + msg.client.name + '</span> @ ' +
              + (dt.getHours() < 10 ? '0' + dt.getHours() : dt.getHours()) + ':'
              + (dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes())
-             + ': ' + message + '</p>');
+             + ': ' + msg.body + '</p>');
     };
 
     function displayRoomName(id) {
